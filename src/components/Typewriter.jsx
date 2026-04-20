@@ -10,39 +10,29 @@ const phrases = [
 ]
 
 export default function Typewriter() {
-  const [currentPhrase, setCurrentPhrase] = useState(0)
-  const [displayed, setDisplayed] = useState('')
-  const [isDeleting, setIsDeleting] = useState(false)
-  const [speed, setSpeed] = useState(80)
+  const [index, setIndex] = useState(0)
+  const [subIndex, setSubIndex] = useState(0)
+  const [reverse, setReverse] = useState(false)
 
   useEffect(() => {
-    const phrase = phrases[currentPhrase]
-
+    if (subIndex === phrases[index].length + 1 && !reverse) {
+      setReverse(true)
+      return
+    }
+    if (subIndex === 0 && reverse) {
+      setReverse(false)
+      setIndex((prev) => (prev + 1) % phrases.length)
+      return
+    }
     const timeout = setTimeout(() => {
-      if (!isDeleting) {
-        setDisplayed(phrase.substring(0, displayed.length + 1))
-        if (displayed.length + 1 === phrase.length) {
-          setSpeed(2000)
-          setIsDeleting(true)
-        } else {
-          setSpeed(80)
-        }
-      } else {
-        setDisplayed(phrase.substring(0, displayed.length - 1))
-        if (displayed.length === 0) {
-          setIsDeleting(false)
-          setCurrentPhrase((prev) => (prev + 1) % phrases.length)
-          setSpeed(400)
-        } else {
-          setSpeed(40)
-        }
-      }
-    }, speed)
-
+      setSubIndex((prev) => prev + (reverse ? -1 : 1))
+    }, reverse ? 40 : 80)
     return () => clearTimeout(timeout)
-  }, [displayed, isDeleting, currentPhrase, speed])
+  }, [subIndex, index, reverse])
 
   return (
-    <span className="typewriter-cursor text-[#F0B429]">{displayed}</span>
+    <span className="typewriter-cursor text-[#F0B429]">
+      {phrases[index].substring(0, subIndex)}
+    </span>
   )
 }
